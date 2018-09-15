@@ -4,6 +4,14 @@ FROM debian:stretch
 RUN apt-get -qq update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends openssh-client python-pygments git ca-certificates asciidoc curl \
 	&& rm -rf /var/lib/apt/lists/*
+	
+# Install Git LFS
+RUN build_deps="curl ca-certificates" && \
+    apt-get update && \
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git-lfs && \
+    git lfs install && \
+    rm -r /var/lib/apt/lists/*
 
 # Install TexLive
 RUN apt-get -qq update \
