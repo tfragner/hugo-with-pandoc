@@ -1,10 +1,10 @@
 FROM debian:stretch
 
-# Install pygments (for syntax highlighting) 
+# Install pygments (for syntax highlighting)
 RUN apt-get -qq update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends openssh-client python-pygments git ca-certificates asciidoc curl \
 	&& rm -rf /var/lib/apt/lists/*
-	
+
 # Install Git LFS
 RUN build_deps="curl ca-certificates" && \
     apt-get update && \
@@ -22,15 +22,15 @@ RUN apt-get -qq update \
 
 # Install Pandoc
 RUN apt-get update && apt-get install ghc cabal-install -y \
-    && cabal update \
+    && cabal update  \
     && echo export PATH='$HOME/.cabal/bin:$PATH' >> $HOME/.bashrc \
     && echo export PATH='$HOME/.cabal/bin:$PATH' >> $HOME/.profile \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install happy zlib1g-dev -y \
-    && cabal install happy \
-    && cabal install pandoc \
-	&& rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install wget -y \
+	&& wget https://github.com/jgm/pandoc/releases/download/2.3/pandoc-2.3-1-amd64.deb \
+	&& dpkg -i pandoc-2.3-1-amd64.deb \
+	&& rm pandoc-2.3-1-amd64.deb
 
 # Install Python
 RUN apt-get -qq update \
@@ -56,7 +56,7 @@ RUN apt-get -qq update \
     && DEBIAN_FRONTEND=noninteractive && apt-get -qq -y remove wget  \
     && DEBIAN_FRONTEND=noninteractive && apt-get -qq -y autoremove \
     && rm -rf /var/lib/apt/lists/*
-    
+
 # Install go
 ENV GO_VERSION 1.11
 
@@ -91,7 +91,7 @@ RUN apt-get -qq update \
     && cd .. && rm -rf hugo \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN cabal install pandoc-citeproc
+# RUN cabal install pandoc-citeproc
 
 RUN mkdir /usr/share/blog
 
