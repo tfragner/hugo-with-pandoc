@@ -20,18 +20,6 @@ RUN apt-get -qq update \
     texlive-fonts-extra texlive-font-utils texlive-extra-utils texlive-bibtex-extra texlive-xetex texlive-luatex \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Pandoc
-RUN apt-get update && apt-get install ghc cabal-install -y \
-    && cabal update  \
-    && echo export PATH='$HOME/.cabal/bin:$PATH' >> $HOME/.bashrc \
-    && echo export PATH='$HOME/.cabal/bin:$PATH' >> $HOME/.profile \
-	&& rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install wget -y \
-	&& wget https://github.com/jgm/pandoc/releases/download/2.3/pandoc-2.3-1-amd64.deb \
-	&& dpkg -i pandoc-2.3-1-amd64.deb \
-	&& rm pandoc-2.3-1-amd64.deb
-
 # Install Python
 RUN apt-get -qq update \
     && DEBIAN_FRONTEND=noninteractive && apt-get install -y build-essential libssl-dev wget zlib1g zlib1g-dev \
@@ -46,13 +34,26 @@ RUN apt-get -qq update \
     && DEBIAN_FRONTEND=noninteractive && apt-get -qq -y autoremove \
     && rm -rf /var/lib/apt/lists/*
 
+		# Install Pandoc
+		RUN apt-get update && apt-get install ghc cabal-install -y \
+		    && cabal update  \
+				&& cabal install pandoc-types \
+		    && echo export PATH='$PATH:$HOME/.cabal/bin' >> $HOME/.bashrc \
+		    && echo export PATH='$PATH:$HOME/.cabal/bin' >> $HOME/.profile \
+			&& rm -rf /var/lib/apt/lists/*
+
+		RUN apt-get update && apt-get install wget -y \
+			&& wget https://github.com/jgm/pandoc/releases/download/2.3/pandoc-2.3-1-amd64.deb \
+			&& dpkg -i pandoc-2.3-1-amd64.deb \
+			&& rm pandoc-2.3-1-amd64.deb
+
 # Install pandoc crossref
 RUN apt-get -qq update \
     && DEBIAN_FRONTEND=noninteractive && apt-get -qq install -y wget \
-    && wget https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.2.1/linux-ghc84-pandoc22.tar.gz \
-    && tar xvf linux-ghc84-pandoc22.tar.gz \
+    && wget https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.3.0/linux-ghc84-pandoc23.tar.gz \
+    && tar xvf linux-ghc84-pandoc23.tar.gz \
     && mv pandoc-crossref* /usr/bin/ \
-    && rm linux-ghc84-pandoc22.tar.gz \
+    && rm linux-ghc84-pandoc23.tar.gz \
     && DEBIAN_FRONTEND=noninteractive && apt-get -qq -y remove wget  \
     && DEBIAN_FRONTEND=noninteractive && apt-get -qq -y autoremove \
     && rm -rf /var/lib/apt/lists/*
