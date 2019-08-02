@@ -59,7 +59,7 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install go
-ENV GO_VERSION 1.11
+ENV GO_VERSION 1.12.7
 
 RUN curl -sL -o /tmp/go${GO_VERSION}.linux-amd64.tar.gz \
     https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
@@ -72,27 +72,17 @@ RUN curl -sL -o /tmp/go${GO_VERSION}.linux-amd64.tar.gz \
 ENV PATH="/root/.cabal/bin:${PATH}"
 
 # Download and install hugo
-ENV HUGO_VERSION v0.48
+ENV HUGO_VERSION v0.55.6
 
 RUN apt-get -qq update \
-	&& DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends git \
-	&& export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin \
-	&& git clone https://github.com/gohugoio/hugo \
-	&& cd hugo && git checkout ${HUGO_VERSION} \
-	&& mkdir -p src/github.com/gohugoio \
-    && ln -sf $(pwd) src/github.com/gohugoio/hugo \
-    && export GOPATH=$(pwd) \
-    && export GOBIN=/usr/local/bin \
-    && rm $GOPATH/go.mod \
-    && go get \
-    && sed -i -- 's/args := \[\]string{"--mathjax"}/args := \[\]string{"--mathjax", "--filter", "pandoc-crossref", "--filter", "pandoc-citeproc", "-M", "linkReferences", "--filter", "pandoc_latex_video.py", "--number-sections"}/g' helpers/content.go \
-    && go build -o hugo main.go \
-    && rm /usr/local/bin/hugo \
-    && cp hugo /usr/local/bin/hugo \
-    && cd .. && rm -rf hugo \
-	&& rm -rf /var/lib/apt/lists/*
-
-# RUN cabal install pandoc-citeproc
+&& export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin \
+&& DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends git build-essential \
+&& mkdir $HOME/src && cd $HOME/src && git clone https://github.com/gohugoio/hugo.git && cd hugo \
+&& sed -i -- 's/args := \[\]string{"--mathjax"}/args := \[\]string{"--mathjax", "--filter", "pandoc-crossref", "--filter", "pandoc-citeproc", "-M", "linkReferences", "--filter", "pandoc_latex_video.py"}/g' helpers/content.go \
+&& go install --tags extended && cp /root/go/bin/hugo /usr/local/bin/hugo \
+&& rm -rf /var/lib/apt/lists/* \
+&& rm -rf $HOME/src \
+&& rm -rf $HOME/work
 
 RUN mkdir /usr/share/blog
 
@@ -103,4 +93,6 @@ EXPOSE 1313
 
 # By default, serve site
 ENV HUGO_BASE_URL http://localhost:1313
-CMD hugo server -b ${HUGO_BASE_URL} --bind=0.0.0.0
+CMD   /usr/share/blog/run.sh
+
+# , "--filter", "demoteHeaders.hs"
